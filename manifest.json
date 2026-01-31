@@ -1,5 +1,5 @@
 {
-  "manifest_version": 2,
+  "manifest_version": 3,
   "name": "Fidelity Options Research Tool",
   "version": "1.0",
   "description": "Provides additional data on Fidelity's options research page",
