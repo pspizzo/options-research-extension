@@ -218,7 +218,7 @@ const init = async () => {
     let gridEl = (await waitForElements()).gridEl;
     const currentPrice = getCurrentPrice();
     if (isNaN(currentPrice)) {
-      console.warn("💥💥💥 Strike Highlighter: Could not read current price");
+      console.warn("💥💥💥 Options Research Extension: Could not read current price");
       return;
     }
     let gridObserver = observeGrid(gridEl);
@@ -235,8 +235,9 @@ const init = async () => {
         }
       }
     }).observe(document.body, { childList: true, subtree: true });
+    console.info("🐇🐇🐇 Options Research Extension: init() successful");
   } catch (err) {
-    console.warn("💥💥💥 Strike Highlighter:", err.message);
+    console.warn("💥💥💥 Options Research Extension:", err.message);
   }
 };
 

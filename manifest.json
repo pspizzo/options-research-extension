@@ -5,7 +5,10 @@
   "description": "Provides additional data on Fidelity's options research page",
   "content_scripts": [
     {
-      "matches": ["https://digital.fidelity.com/ftgw/digital/options-research/*"],
+      "matches": [
+          "https://digital.fidelity.com/ftgw/digital/options-research",
+          "https://digital.fidelity.com/ftgw/digital/options-research/*"
+      ],
       "js": ["content.js"],
       "run_at": "document_idle"
     }
