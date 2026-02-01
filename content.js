@@ -48,9 +48,7 @@ const getAnnualCallYield = (optionPrice, stockPrice, daysToExpire) => {
 
 const parseExpirationHeaders = () => {
   const headers = document.querySelectorAll(EXPIRATION_GROUP_SELECTOR);
-  const expirations = [];
-
-  for (const header of headers) {
+  const expirations = [...headers].map((header) => {
     const rowIndex = parseInt(header.getAttribute("row-index"), 10);
     const rowId = header.getAttribute("row-id");
     // row-id format: "row-group-expirationData-Mar 20, 2026 (M)|in 49 days"
@@ -63,8 +61,8 @@ const parseExpirationHeaders = () => {
     const daysMatch = daysPart.match(/(\d+)/);
     const expirationDays = daysMatch ? parseInt(daysMatch[1], 10) : NaN;
 
-    expirations.push({ rowIndex, expirationDate, expirationDays });
-  }
+    return { rowIndex, expirationDate, expirationDays };
+  });
 
   expirations.sort((a, b) => a.rowIndex - b.rowIndex);
   return expirations;
@@ -145,9 +143,7 @@ const removeOverlays = (container) => {
     el.removeAttribute(DATA_ATTR_PROCESSED);
   });
   container.querySelectorAll(".spizzo-overlay").forEach((el) => el.remove());
-  container.querySelectorAll(".spizzo-container").forEach((el) => {
-    el.classList.remove("spizzo-container");
-  });
+  container.querySelectorAll(".spizzo-container").forEach((el) => el.classList.remove("spizzo-container"));
 };
 
 const observeGrid = (container) => {
