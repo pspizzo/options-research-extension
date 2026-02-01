@@ -186,59 +186,49 @@ const observeGrid = (container) => {
   return observer;
 };
 
-const waitForElements = () =>
-  new Promise((resolve, reject) => {
-    const maxAttempts = 60;
-    let attempts = 0;
+const startObserving = (gridEl) => {
+  let gridObserver = observeGrid(gridEl);
 
-    const poll = () => {
-      attempts++;
-      const priceEl = document.querySelector(PRICE_SELECTOR);
-      const gridEl = document.querySelector(GRID_CONTAINER_SELECTOR);
-
-      if (priceEl && gridEl) {
-        resolve({ priceEl, gridEl });
-        return;
+  // Watch for grid container being replaced entirely (full AJAX re-render)
+  new MutationObserver(() => {
+    if (!document.contains(gridEl)) {
+      const newGridEl = document.querySelector(GRID_CONTAINER_SELECTOR);
+      if (newGridEl) {
+        gridObserver.disconnect();
+        gridEl = newGridEl;
+        console.log("🐇 Grid container replaced, re-initializing overlays");
+        gridObserver = observeGrid(newGridEl);
       }
+    }
+  }).observe(document.body, { childList: true, subtree: true });
 
-      if (attempts >= maxAttempts) {
-        reject(new Error("Timed out waiting for options page elements"));
-        return;
+  console.info("🐇🐇🐇 Options Research Extension: init() successful");
+};
+
+const init = () => {
+  injectStyles();
+
+  // Check if grid already exists
+  const gridEl = document.querySelector(GRID_CONTAINER_SELECTOR);
+  if (gridEl) {
+    startObserving(gridEl);
+    return;
+  }
+
+  // Grid not found yet — observe body for DOM changes until it appears
+  let debounceTimer = null;
+  const bodyObserver = new MutationObserver(() => {
+    if (debounceTimer) clearTimeout(debounceTimer);
+    debounceTimer = setTimeout(() => {
+      const el = document.querySelector(GRID_CONTAINER_SELECTOR);
+      if (el) {
+        bodyObserver.disconnect();
+        startObserving(el);
       }
-
-      setTimeout(poll, 500);
-    };
-
-    poll();
+    }, 200);
   });
 
-const init = async () => {
-  injectStyles();
-  try {
-    let gridEl = (await waitForElements()).gridEl;
-    const currentPrice = getCurrentPrice();
-    if (isNaN(currentPrice)) {
-      console.warn("💥💥💥 Options Research Extension: Could not read current price");
-      return;
-    }
-    let gridObserver = observeGrid(gridEl);
-
-    // Watch for grid container being replaced entirely (full AJAX re-render)
-    new MutationObserver(() => {
-      if (!document.contains(gridEl)) {
-        const newGridEl = document.querySelector(GRID_CONTAINER_SELECTOR);
-        if (newGridEl) {
-          gridObserver.disconnect();
-          gridEl = newGridEl;
-          console.log("🐇 Grid container replaced, re-initializing overlays");
-          gridObserver = observeGrid(newGridEl);
-        }
-      }
-    }).observe(document.body, { childList: true, subtree: true });
-    console.info("🐇🐇🐇 Options Research Extension: init() successful");
-  } catch (err) {
-    console.warn("💥💥💥 Options Research Extension:", err.message);
-  }
+  bodyObserver.observe(document.body, { childList: true, subtree: true });
 };
 
 init();
